@@ -32,6 +32,7 @@ async function run() {
     // Send a ping to confirm a successful connection
 
     const bookCollection = client.db('bookDB').collection('books');
+    const borrowedCollection = client.db('bookDB').collection('borrowed');
 
     app.post('/book', async (req, res) => {
       const newBook = req.body;
@@ -75,6 +76,84 @@ async function run() {
         res.status(500).send('Internal Server Error');
       }
     });
+
+    
+    
+
+    app.patch('/book',async(req,res) => {
+      const book = req.body;
+      const filter = {_id: new ObjectId(book.id)};
+      const updatedDoc = {
+         $set : {
+           quantity: book.quantity,
+           returnDate:book.returnDate,
+           borrowedDate:book.borrowedDate
+         }
+      }
+
+      const result = await bookCollection.updateOne(filter,updatedDoc);
+      res.send(result);
+   })
+
+
+
+
+   app.post('/borrowed', async (req, res) => {
+    const addedBook = req.body;
+    const result = await borrowedCollection.insertOne(addedBook);
+    res.send(result);
+  })
+  
+   
+   
+
+  //   app.patch('/book',async(req,res) => {
+  //     const user = req.body;
+  //     const filter = {email: user.email};
+  //     const updatedDoc = {
+  //        $set : {
+  //          lastLoggedAt: user.lastLoggedAt,
+  //        }
+  //     }
+
+  //     const result = await userCollection.updateOne(filter,updatedDoc);
+  //     res.send(result);
+  //  })
+
+
+
+
+  // app.patch('/product/:id', async (req, res) => {
+  //   try {
+  //     const id = req.params.id;
+  
+  //     if (!ObjectId.isValid(id)) {
+  //       return res.status(400).send('Invalid ID');
+  //     }
+  
+  //     const updatedFields = req.body;
+  //     const filter = { _id: new ObjectId(id) };
+  //     const update = {
+  //       $set: updatedFields
+  //     };
+  
+  //     const result = await productCollection.updateOne(filter, update);
+  
+  //     if (result.matchedCount === 0) {
+  //       return res.status(404).send('Product not found');
+  //     }
+  
+  //     res.send(result);
+  //   } catch (error) {
+  //     console.error(error);
+  //     res.status(500).send('Internal Server Error');
+  //   }
+  // });
+  
+
+
+
+
 
 
     await client.db("admin").command({ ping: 1 });
