@@ -45,6 +45,13 @@ async function run() {
       const result = await cursor.toArray();
       res.send(result);
     })
+    
+    app.get('/filter', async (req, res) => {
+      const cursor = bookCollection.find({ quantity: { $gt: 0 } }); // the $gt operator to filter for quantity > 0
+      const result = await cursor.toArray();
+      res.send(result);
+    })
+    
 
 
     app.get('/book/:category', async (req, res) => {
@@ -82,15 +89,15 @@ async function run() {
 
     app.patch('/book',async(req,res) => {
       const book = req.body;
+      // console.log('patch is hit ', book);
       const filter = {_id: new ObjectId(book.id)};
       const updatedDoc = {
          $set : {
            quantity: book.quantity,
-           returnDate:book.returnDate,
-           borrowedDate:book.borrowedDate
+          
          }
       }
-
+      console.log('Updated Doc',updatedDoc);
       const result = await bookCollection.updateOne(filter,updatedDoc);
       res.send(result);
    })
@@ -104,7 +111,14 @@ async function run() {
     res.send(result);
   })
   
-   
+  app.get('/borrowed', async (req, res) => {
+    const email = req.query.email; // the query parameter is named 'email'
+    const query = { email: email }; // Define the query object with the email parameter
+    
+    const cursor = borrowedCollection.find(query); // Using the query in the find function
+    const result = await cursor.toArray();
+    res.send(result);
+  });
    
 
   //   app.patch('/book',async(req,res) => {
@@ -150,7 +164,16 @@ async function run() {
   //   }
   // });
   
+   
 
+  
+  app.delete('/borrowed/:id', async (req, res) => {
+    const id = req.params.id;
+    console.log(id);
+    const query = { _id: new ObjectId(id)};
+    const result = await borrowedCollection.deleteOne(query);
+    res.send(result);
+  })
 
 
 
