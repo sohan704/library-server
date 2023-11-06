@@ -33,6 +33,7 @@ async function run() {
 
     const bookCollection = client.db('bookDB').collection('books');
     const borrowedCollection = client.db('bookDB').collection('borrowed');
+    const categoryCollection = client.db('bookDB').collection('catCollection');
 
     app.post('/book', async (req, res) => {
       const newBook = req.body;
@@ -45,6 +46,14 @@ async function run() {
       const result = await cursor.toArray();
       res.send(result);
     })
+
+    app.get('/category', async(req,res) => {
+      const cursor = categoryCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    })
+
+
     
     app.get('/filter', async (req, res) => {
       const cursor = bookCollection.find({ quantity: { $gt: 0 } }); // the $gt operator to filter for quantity > 0
@@ -53,6 +62,15 @@ async function run() {
     })
     
 
+    app.get('/testing', async (req, res) => {
+      const cursor = bookCollection.find(
+        { quantity: { $gt: 2 } }, // Query for quantity > 0
+        { projection: { author: 1, quantity: 1, _id: 0 } } // Include only author and quantity, exclude _id
+      );
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
 
     app.get('/book/:category', async (req, res) => {
       const category = req.params.category;
@@ -60,6 +78,17 @@ async function run() {
       const result = await bookCollection.find(query).toArray();
       res.send(result);
     })
+
+    app.get('/getBook/:id', async (req, res) => {
+      const id = req.params.id;
+      console.log(id);
+      const query = { _id: new ObjectId(id) };
+      const result = await bookCollection.find(query).toArray();
+      res.send(result);
+    })
+
+
+
 
     app.get('/book/:category/:id', async (req, res) => {
       try {
@@ -85,6 +114,25 @@ async function run() {
     });
 
     
+    app.put('/bookUpdate/:id', async(req,res) => {
+      const id = req.params.id;
+      const newBook = req.body;
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updatedProd = {
+        $set: {
+          image: newBook.image,
+          name: newBook.name,
+          author: newBook.author,
+          category: newBook.category,
+          rating: newBook.rating,
+        }
+      }
+
+      const result = await bookCollection.updateOne(filter, updatedProd, options);
+      res.send(result);
+    })
+
     
 
     app.patch('/book',async(req,res) => {
