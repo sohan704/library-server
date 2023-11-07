@@ -114,7 +114,7 @@ async function run() {
 
 
     //main server api
-    app.post('/book', async (req, res) => {
+    app.post('/book', logger, verifyToken, async (req, res) => {
       const newBook = req.body;
       const result = await bookCollection.insertOne(newBook);
       res.send(result);
@@ -159,6 +159,9 @@ async function run() {
       res.send(result);
     })
 
+
+
+
     app.get('/getBook/:id', async (req, res) => {
       const id = req.params.id;
       console.log(id);
@@ -183,7 +186,7 @@ async function run() {
         const result = await bookCollection.findOne(query);
 
         if (!result) {
-          return res.status(404).send('Product not found');
+          return res.status(404).send('Book not found');
         }
 
         res.send(result);
