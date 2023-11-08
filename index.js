@@ -9,7 +9,12 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:5173'],
+  origin: [
+    'https://library-management-74fff.web.app', 
+    'https://library-management-74fff.firebaseapp.com', 
+    'http://localhost:5173'
+
+  ],
   credentials: true,
 }));
 app.use(express.json());
@@ -135,11 +140,19 @@ async function run() {
 
 
 
+    // app.get('/filter', logger, verifyToken, async (req, res) => {
+    //   const cursor = bookCollection.find({ quantity: { $gt: 0 } }); // the $gt operator to filter for quantity > 0
+    //   const result = await cursor.toArray();
+    //   res.send(result);
+    // })
+
+
     app.get('/filter', logger, verifyToken, async (req, res) => {
-      const cursor = bookCollection.find({ quantity: { $gt: 0 } }); // the $gt operator to filter for quantity > 0
+      const cursor = bookCollection.find({ $expr: { $gt: [ { $toInt: "$quantity" }, 0 ] } });
       const result = await cursor.toArray();
       res.send(result);
     })
+
 
 
     app.get('/testing', async (req, res) => {
